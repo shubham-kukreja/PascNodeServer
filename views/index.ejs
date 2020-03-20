@@ -1,0 +1,40 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+
+    <title>Node File uploads</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>File Upload</h1>
+        <%= typeof msg != 'undefined' ? msg : '' %>
+            <form action="/thumbnail/upload" method="POST" enctype="multipart/form-data">
+                <div class="file-field input-field">
+                    <div class="btn grey">
+                        <span>File</span>
+                        <input name="myImage" type="file">
+                        <label>Browser Select</label>
+                        <!-- <select class="browser-default">
+    <option value="" disabled selected>Choose your option</option>
+    <option value="1">ACM-W</option>
+    <option value="2">SIG</option>
+    <option value="3">Pasckathon</option>
+  </select> -->
+                    </div>
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
+                    </div>
+                </div>
+                <button type="submit" class="btn">Submit</button>
+            </form>
+            <!-- <img src="" class= "img-responsive" alt=""> -->
+    </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+
+</html>
