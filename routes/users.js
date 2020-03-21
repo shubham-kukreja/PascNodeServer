@@ -165,7 +165,7 @@ router.post('/login', async(req, res) => {
                 var token = jwt.sign( payload, process.env.JWT_SECRET_KEY  );
 
                 console.log(token)
-                res.json({ error : false,  token, user });
+                res.json({ error : false,  token, user : { admin:user.admin , firstname:user.firstname , lastname:user.lastname , _id:user._id}});
             }
         })
 });

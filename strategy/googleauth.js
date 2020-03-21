@@ -23,7 +23,7 @@ passport.use(new GoogleStrategy({
         .then((euser) => {
             if (euser) {
                 console.log('User Already exists');
-                done(null, euser);
+                return done(null, euser);
             } else {
                 new user({
                         username: profile.displayName,

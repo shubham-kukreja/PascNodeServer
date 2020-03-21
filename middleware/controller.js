@@ -39,17 +39,23 @@ isAuthenticated = async function (req, res, next) {
 
 isAdmin = async function (req, res, next) {
     if (!req.headers.authorization) {
+        console.log(req.headers.authorization);
+
         return res.json({ error: 'Header does not  exists', token: null })
     }
     const token = req.headers.authorization.split(' ')[1];
     
     if (!token) {
+        console.log("admin2");
+
         return res.json({ error: 'Token Not available', token: null })
     }
     
     var payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     if (!payload) {
+        console.log("admin3")
+
         return res.json({ error: 'Incorrect Token', token: null })
     }
 
@@ -62,6 +68,7 @@ isAdmin = async function (req, res, next) {
                     email: user1.email, admin: user1.admin
                 }
                 req.token = token
+                console.log("admin")
                 next();
             } else {
                 res.json({ error: 'You are not an Admin' })
