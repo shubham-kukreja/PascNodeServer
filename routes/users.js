@@ -40,15 +40,15 @@ router.get('/google/logout', (req, res) => {
 });
 
 // SIGNING UP USER
-router.post('/signup' /*, handleRecaptcha*/ , (req, res) => {
+router.post('/signup' , handleRecaptcha , (req, res) => {
     TempUser.findOne({ email: req.body.email })
         .then(async(newUser) => {
             if (newUser) {
-                res.status(404).json({ error: 'User already exists', token: null });
+                return res.json({ error: 'Email already exists', token: null });
             } else {
                 var url;
                 crypto.randomBytes(48, (err, buf) => {
-                    if (err) console.log(err);
+                    if (err) return console.log(err);
                     url = buf.toString('hex');
                     const hashedPassword = bcrypt.hashSync(req.body.password);
                     var newTempUser = new TempUser({
@@ -76,7 +76,7 @@ router.get('/verify/:url', (req, res) => {
     TempUser.findOne({ URL: url })
         .then(tempuser => {
             if (!tempuser) {
-                res.json('No Such User found')
+                return res.json('No Such User found')
             } else {
                 //THIS USER NEEDS TO BE DELETED FROM TEMP USER AND 
                 //STORED IN USER MODEL
@@ -103,11 +103,11 @@ router.post('/login', async(req, res) => {
     user.findOne({ email: req.body.email })
         .then(async(user) => {
             if (!user) {
-                res.status(404).json({ error: 'User Does not exist', token: null });
+                return res.json({ error: 'Incorrect Email Or Password ' , token: null });
             }
             const condition = (await bcrypt.compare(req.body.password, user.password));
             if (!condition) {
-                res.status(404).json({ error: 'Password Incorrect', token: null });
+                res.json({ error: 'Incorrect Email Or Password ', token: null });
             } else {
                 var payload = { subject: user._id };
                 var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);

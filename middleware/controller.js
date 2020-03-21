@@ -51,6 +51,7 @@ isAdmin = function(req, res, next) {
 handleRecaptcha = function(req, res, next) {
     const captchaSecret = options.recapcha.secretKey;
     const token = req.body.captcha;
+    console.log(token)
     const url = `https://www.google.com/recaptcha/api/siteverify?secret=${captchaSecret}&response=${token}`;
 
 
@@ -58,12 +59,12 @@ handleRecaptcha = function(req, res, next) {
         .then(response => response.json())
         .then(data => {
             if (!data.success) {
-                res.json({ 'success': false, 'msg': 'Recaptcha has failed' })
+                return res.json({ 'success': false, 'error': 'Recaptcha has failed' })
             } else {
                 next();
             }
         })
-        .catch(error => res.json({ 'success': false, 'msg': 'Recaptcha has failed' }))
+        .catch(error => res.json({ 'success': false, 'error': 'Recaptcha has failed' }))
 }
 
 
