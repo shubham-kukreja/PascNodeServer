@@ -15,12 +15,14 @@ var router = express.Router();
 
 //GOOGLE OAUTH  
 router.get('/google', passport.authenticate('google', { scope: ['profile email'] }), (req, res) => {
-    res.json('Hey ther this ');
+    res.json('Google Login Successfull !! ');
 });
 
 //GOOGLE REDIRECT LINK
 router.get('/google/callback', passport.authenticate('google'), (req, res) => {
-    var payload = { subject: req.user._id }
+    const user=req.user
+    var payload = { subject: user._id , firstname:user.firstname 
+        , lastname:user.lastname , admin:user.admin};
     var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
     res.json({
         token: token,
@@ -40,35 +42,82 @@ router.get('/google/logout', (req, res) => {
 });
 
 // SIGNING UP USER
+
 router.post('/signup' , handleRecaptcha , (req, res) => {
-    TempUser.findOne({ email: req.body.email })
-        .then(async(newUser) => {
+    user.findOne({ email: req.body.email })
+        .then(existingUser => {
+            if (existingUser) {
+                return  res.json({ 'error': 'User already exists ', 'token': null });
+
+            }
+            return TempUser.findOne({ email: req.body.email })
+        })
+        .then(newUser => {
             if (newUser) {
-                return res.json({ error: 'Email already exists', token: null });
+                return res.json({ 'error': 'User already exists ', 'token': null });
             } else {
                 var url;
                 crypto.randomBytes(48, (err, buf) => {
-                    if (err) return console.log(err);
+                    if (err) console.log(err);
                     url = buf.toString('hex');
+         
                     const hashedPassword = bcrypt.hashSync(req.body.password);
                     var newTempUser = new TempUser({
-                        email: req.body.email,
-                        password: hashedPassword,
                         firstname: req.body.firstname,
                         lastname: req.body.lastname,
+                        email: req.body.email,
+                        password: hashedPassword,
+    
                         admin: false,
                         URL: url
                     });
                     console.log('The User has been saved to the temporary storage');
                     const verifyurl = "https://" + req.headers.host + '/auth/verify/' + url;
                     verificationMail(newTempUser.email, verifyurl);
-                    newTempUser.save();
-                    res.json({ 'user': newTempUser, 'status': 'The user has been saved' });
+                    newTempUser.save().then( uuser => console.log(uuser) );
+                    return res.json({ 'user': { 'firstname': newTempUser.firstname, 'lastname': newTempUser.lastname, 'email': newTempUser.email }, 'status': 'The user has been saved' });
                 });
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => {throw new Error(err)})
 });
+
+
+// router.post('/signup' /*, handleRecaptcha*/ , (req, res) => {
+//     user.findOne({ email: req.body.email })
+//         .then(existingUser => {
+//             if (existingUser) {
+//                 return existingUser
+//             }
+//             return TempUser.findOne({ email: req.body.email })
+//         })
+//         .then(newUser => {
+//             if (newUser) {
+//                 res.json({ 'error': 'User already exists please verify you account', 'token': null });
+//             } else {
+//                 var url;
+//                 crypto.randomBytes(48, (err, buf) => {
+//                     if (err) console.log(err);
+//                     url = buf.toString('hex');
+//                     const hashedPassword = bcrypt.hashSync(req.body.password);
+//                     var newTempUser = new TempUser({
+//                         email: req.body.email,
+//                         password: hashedPassword,
+//                         firstname: req.body.firstname,
+//                         lastname: req.body.lastname,
+//                         admin: false,
+//                         URL: url
+//                     });
+//                     console.log('The User has been saved to the temporary storage');
+//                     const verifyurl = "https://" + req.headers.host + '/auth/verify/' + url;
+//                     verificationMail(newTempUser.email, verifyurl);
+//                     newTempUser.save();
+//                     return res.json({ 'user': { 'firstname': newTempUser.firstname, 'lastname': newTempUser.lastname, 'email': newTempUser.email }, 'status': 'The user has been saved' });
+//                 });
+//             }
+//         })
+//         .catch(err => console.log(err))
+// });
 
 
 router.get('/verify/:url', (req, res) => {
@@ -100,28 +149,40 @@ router.get('/verify/:url', (req, res) => {
 
 // FOR LOGGING THE USER INTO THE APP
 router.post('/login', async(req, res) => {
-    user.findOne({ email: req.body.email })
+  user.findOne({ email: req.body.email })
         .then(async(user) => {
             if (!user) {
-                return res.json({ error: 'Incorrect Email Or Password ' , token: null });
+                return res.json({ error: ' Verify Email Address or Incorrect Email Address ' , token: null });
             }
-            const condition = (await bcrypt.compare(req.body.password, user.password));
+            const condition = await bcrypt.compare(req.body.password, user.password);
             if (!condition) {
-                res.json({ error: 'Incorrect Email Or Password ', token: null });
+                return res.json({ error: 'Incorrect Email Or Password ', token: null });
             } else {
-                var payload = { subject: user._id };
-                var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
-                res.json({ error: null, token: token, userd: { firstname: user.firstname, lastname: user.lastname, email: user.email, admin: user.admin } });
+                console.log(user)
+                var payload = { subject: user._id , firstname:user.firstname 
+                    , lastname:user.lastname , admin:user.admin};
+                
+                var token = jwt.sign( payload, process.env.JWT_SECRET_KEY  );
+
+                console.log(token)
+                res.json({ error : false,  token, user });
             }
         })
 });
 
 
 //FOR CHECKING WHETHER ADMIN OR NOT This is a waste
-router.get('/protected', isAuthenticated, (req, res) => {
+router.get('/profile', isAuthenticated , (req, res) => {
     console.log('You are authenticated');
-    console.log(req.payload);
-    res.json({ 'Noice': 'abc', 'token': req.payload });
+    console.log(req.user1);
+    res.json({ 'error': false , 'token': req.token , user : req.user1});
+})
+
+//FOR CHECKING WHETHER ADMIN OR NOT This is a waste
+router.get('/admin', isAdmin , (req, res) => {
+    console.log('You are authenticated');
+    console.log(req.user1);
+    res.json({ 'error': false , 'admin':true ,'token': req.token , 'user' : req.user1});
 })
 
 

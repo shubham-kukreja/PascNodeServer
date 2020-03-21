@@ -40,7 +40,7 @@ router.get("/blogdetails/:blogid", async(req, res) => {
 
 
 // admin getting blogs for approving
-router.get("/reviewblogs/", /*[isAuthenticated, isAdmin],*/ async(req, res) => {
+router.get("/reviewblogs/", [isAuthenticated, isAdmin], async(req, res) => {
     try {
         const blogs = await Blog.find({ approve: false });
         console.log(blogs);
@@ -98,7 +98,7 @@ router.put("/update/:id", isAuthenticated, async(req, res) => {
 
 
 // admin approving the blog
-router.put("/reviewblogs/approve/:id",/* isAdmin,*/ async(req, res) => {
+router.put("/reviewblogs/approve/:id", isAdmin ,  async(req, res) => {
     const id = req.params.id;
     const selectedBlog = await Blog.findById(id);
     if (selectedBlog == null)
@@ -111,7 +111,7 @@ router.put("/reviewblogs/approve/:id",/* isAdmin,*/ async(req, res) => {
 });
 
 // author deleting his blog
-router.delete("/delete/:id", /*[isAuthenticated],*/ async(req, res) => {
+router.delete("/delete/:id", [isAuthenticated], async(req, res) => {
     try {
         console.log(req.params.id);
 
@@ -138,7 +138,7 @@ router.delete("/delete/:id", /*[isAuthenticated],*/ async(req, res) => {
 
 
 // admin deleting the blog
-router.delete("/admin/delete/:blogid",/* [isAuthenticated, isAdmin],*/ async(req, res) => {
+router.delete("/admin/delete/:blogid", [isAuthenticated, isAdmin], async(req, res) => {
     try {
         console.log(req.params.blogid);
 

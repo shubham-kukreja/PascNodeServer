@@ -5,42 +5,63 @@ var fetch = require('isomorphic-fetch');
 var { options } = require('../config/config');
 
 
-isAuthenticated = function(req, res, next) {
+isAuthenticated = async function (req, res, next) {
     if (!req.headers.authorization) {
-        return res.status(404).json({ error: 'Header does not  exists', token: null })
+        return res.json({ error: true , token: null })
     }
+    console.log(req.headers.authorization)
     const token = req.headers.authorization.split(' ')[1];
     if (!token) {
-        return res.status(404).json({ error: 'Token Not available', token: null })
+        return res.json({ error: true , token: null })
     }
     var payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
     if (!payload) {
-        return res.status(404).json({ error: 'Incorrect Token', token: null })
+        return res.json({ error: true , token: null })
     }
 
-    req.payload = payload;
-    console.log(req.payload, payload);
+    console.log(payload.subject)
+    const user1 = await user.findById(payload.subject)
+
+
+    if (!user1) {
+        throw new Error({ error: true, token: null })
+    }
+
+    req.user1 = {
+        firstname: user1.firstname, lastname: user1.lastname,
+        email: user1.email, admin: user1.admin
+    }
+    req.token = token
+
 
     next();
 }
 
-isAdmin = function(req, res, next) {
+isAdmin = async function (req, res, next) {
     if (!req.headers.authorization) {
-        return res.status(404).json({ error: 'Header does not  exists', token: null })
+        return res.json({ error: 'Header does not  exists', token: null })
     }
     const token = req.headers.authorization.split(' ')[1];
+    
     if (!token) {
-        return res.status(404).json({ error: 'Token Not available', token: null })
+        return res.json({ error: 'Token Not available', token: null })
     }
+    
     var payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
     if (!payload) {
-        return res.status(404).json({ error: 'Incorrect Token', token: null })
+        return res.json({ error: 'Incorrect Token', token: null })
     }
 
     req.payload = payload;
     user.findById(req.payload.subject)
         .then((user1) => {
             if (user1 && user1.admin) {
+                req.user1 = {
+                    firstname: user1.firstname, lastname: user1.lastname,
+                    email: user1.email, admin: user1.admin
+                }
+                req.token = token
                 next();
             } else {
                 res.json({ error: 'You are not an Admin' })
@@ -48,7 +69,7 @@ isAdmin = function(req, res, next) {
         })
 }
 
-handleRecaptcha = function(req, res, next) {
+handleRecaptcha = function (req, res, next) {
     const captchaSecret = options.recapcha.secretKey;
     const token = req.body.captcha;
     console.log(token)
