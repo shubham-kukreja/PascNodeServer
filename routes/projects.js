@@ -53,7 +53,7 @@ router.get("/reviewprojects/",[isAuthenticated,isAdmin], async (req, res) => {
 
 
 // user posting new project
-router.post("/new/", isAuthenticated, async (req, res) => {
+router.post("/new/", async (req, res) => {
   const result = validateProject(req.body);
   if (result.error) {
     console.log("Body", result);
@@ -61,7 +61,7 @@ router.post("/new/", isAuthenticated, async (req, res) => {
   } else {
     try {
       req.body.approve = false;
-      const project = new Projects(req.body);
+      const project = new Project(req.body);
 
       const temp = await project.save();
       console.log("Added successfully", temp);

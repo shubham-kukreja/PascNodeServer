@@ -29,13 +29,14 @@ const validateProject = (data) => {
     const schema = Joi.object( {
         // author: string,
         author: Joi.object({
-            author_id: Joi.objectId().required(),
+            author_id: Joi.objectId(),
             author_name: Joi.string(),
         }),
+        link : Joi.string(),
         approve: Joi.boolean(),
         category: Joi.string(),
         content: Joi.string(),
-        data: Joi.date(),
+        date: Joi.date(),
         heading: Joi.string(),
         // blog_id: Joi.objectId(),
         image: Joi.string(),
