@@ -4,7 +4,7 @@ var event = require('../models/events');
 var router = express.Router();
 
 router.get('/', (req, res) => {
-    event.find({})
+    event.find({}).sort({date:-1} )
         .then((events) => {
             res.send(events);
         })
@@ -34,14 +34,13 @@ router.post('/', (req, res) => {
 
 router.delete('/:id', (req, res) => {
     const id = req.params.id;
-    event.findOneAndDelete({ _id: id }, err => {
-        if (err) {
-            res.status(401).send('Unauthorized');
-        } else {
-            res.redirect('/api/events');
-        }
-    });
+    event.findOneAndDelete({ _id: id }).then((upcoming)=> {
+        res.send(upcoming)
+        res.end()
+    })
+    .catch((e)=> {
+        res.status(404).send('Not Found')
+    })
+
 })
-
-
 module.exports = router;
