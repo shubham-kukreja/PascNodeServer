@@ -1,28 +1,28 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors');
-var passport = require('passport');
-var cookieSession = require('cookie-session');
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
+var cors = require("cors");
+var passport = require("passport");
+var cookieSession = require("cookie-session");
+var bodyParser = require('body-parser');    
 
 require("dotenv").config();
-require('./config/database');
+require("./config/database");
 
 // these are the routes that are controlling the api routes
-var eventRoute = require('./routes/events');
-var eventsRoute = require('./routes/upcoming');
-var indexRoute = require('./routes/index');
-var usersRoute = require('./routes/users');
-var feedbackRoute = require('./routes/feedback');
-var thumbnailRoute = require('./routes/thumbnail');
-const resetpasswordRoute = require('./routes/password');
-const blogsRoute = require('./routes/blogs');
-const projectsRoute = require('./routes/projects');
+var eventRoute = require("./routes/events");
+var eventsRoute = require("./routes/upcoming");
+var indexRoute = require("./routes/index");
+var usersRoute = require("./routes/users");
+var feedbackRoute = require("./routes/feedback");
+var thumbnailRoute = require("./routes/thumbnail");
+const resetpasswordRoute = require("./routes/password");
+const blogsRoute = require("./routes/blogs");
+const projectsRoute = require("./routes/projects");
 
 var app = express();
-
 
 // app.all('*', (req, res, next) => {
 //     if (req.secure) {
@@ -32,47 +32,45 @@ var app = express();
 //     }
 // })
 
-
 app.use(cors());
-app.use(cookieSession({
+app.use(
+  cookieSession({
     maxAge: 3600 * 1000,
-    keys: ['something']
-}));
+    keys: ["something"]
+  })
+);
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set("views", path.join(__dirname, "views"));
 
-
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
-
+app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "ejs");
 
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
+// defining the routes
+app.use("/", indexRoute);
 
-// defining the routes 
-app.use('/', indexRoute);
-
-
-app.use('/auth', usersRoute);
-app.use('/api/events', eventRoute);
-app.use('/api/upcoming', eventsRoute);
-app.use('/feedback', feedbackRoute);
-app.use('/thumbnail', thumbnailRoute);
-app.use('/resetpassword', resetpasswordRoute);
-app.use('/api/blogs', blogsRoute);
-app.use('/api/projects', projectsRoute);
+app.use("/auth", usersRoute);
+app.use("/api/events", eventRoute);
+app.use("/api/upcoming", eventsRoute);
+app.use("/feedback", feedbackRoute);
+app.use("/thumbnail", thumbnailRoute);
+app.use("/resetpassword", resetpasswordRoute);
+app.use("/api/blogs", blogsRoute);
+app.use("/api/projects", projectsRoute);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    next(createError(404));
+  next(createError(404));
 });
-
 
 // error handler
 /*
@@ -87,6 +85,10 @@ app.use(function(err, req, res, next) {
 });
 */
 const port = process.env.PORT || 3000;
+<<<<<<< HEAD
 app.listen(3000, () => console.log("listening on port 3000"));
+=======
+app.listen(port, () => console.log("listening on port 3000"));
+>>>>>>> 7f3ab5bcc6ac85ae453d5855130a3bc1e40f8a35
 
 module.exports = app;

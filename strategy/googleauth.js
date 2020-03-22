@@ -1,17 +1,17 @@
-var passport = require('passport');
-var user = require('../models/user');
-var { options } = require('../config/config');
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var passport = require("passport");
+var user = require("../models/user");
+var { options } = require("../config/config");
+var GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
 
 passport.serializeUser((user, done) => {
-    done(null, user.id)
+  done(null, user.id);
 });
 
 passport.deserializeUser((userid, done) => {
-    user.findById(userid).then((user) => {
-        done(null, user);
-    })
-})
+  user.findById(userid).then(user => {
+    done(null, user);
+  });
+});
 
 passport.use(new GoogleStrategy({
     clientID: options.googleAuth.id,
