@@ -14,6 +14,19 @@ router.get('/', (req, res) => {
             res.end();
         })
 });
+
+router.get('/eventsd/:id', (req,res)=> {
+    upcomingEvents.findById(req.params.id)
+    .then((upcoming)=> {
+        res.send(upcoming)
+        res.end()
+    })
+    .catch((e)=> {
+        res.status(404).send('Not Found')
+        res.end()
+    })
+})
+
 router.post('/', (req, res) => {
     var newUpcoming = new upcomingEvents({
         date: req.body.date,
@@ -33,6 +46,7 @@ router.post('/', (req, res) => {
 
 router.delete('/:id', (req, res) => {
     const id = req.params.id;
+    console.log(id)
     upcomingEvents.findOneAndDelete({ _id: id }, err => {
         if (err) {
             res.status(401).send('Unauthorized');
