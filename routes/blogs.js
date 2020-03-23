@@ -9,7 +9,6 @@ const { isAuthenticated, isAdmin } = require("../middleware/controller");
 router.get("/", async(req, res) => {
     try {
         const blogs = await Blog.find({ approve: true });
-        console.log(blogs);
         res.send(blogs);
     } catch (error) {
         console.log(error);
@@ -26,7 +25,6 @@ router.get("/blogdetails/:blogid", async(req, res) => {
         const blog = await Blog.findById(req.params.blogid);
         // const blog = await Blog.findOne({author_id: req.params.blogid});
         if (blog === null) {
-            console.log("Blog with given id does not exists");
             res.status(404).send("Could not find the blog");
         } else {
             console.log(blog);
@@ -56,17 +54,14 @@ router.get("/reviewblogs/", [isAuthenticated, isAdmin], async(req, res) => {
 router.post("/new/", async(req, res) => {
     const result = validateBlog(req.body);
     if (result.error) {
-        console.log("Body", result);
         res.status(400).send(result.error.details[0].message);
     } else {
         try {
             const blog = new Blog(req.body);
 
             const temp = await blog.save();
-            console.log("Added successfully", temp);
             res.send(temp);
         } catch (error) {
-            console.error(error);
             res.send("Error saving");
         }
     }

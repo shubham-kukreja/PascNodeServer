@@ -42,7 +42,7 @@ router.get("/projectdetails/:id", isAuthenticated, async (req, res) => {
 // admin getting projects for approving
 router.get("/reviewprojects/",[isAuthenticated,isAdmin], async (req, res) => {
   try {
-    const projects = await Projects.find({ approve: false });
+    const projects = await Project.find({ approve: false });
     console.log(projects);
     res.send(projects);
   } catch (error) {
@@ -141,15 +141,14 @@ router.delete("/delete/:id",[isAuthenticated], async (req, res) => {
 // admin deleting the project
 router.delete("/admin/delete/:id",[isAuthenticated,isAdmin], async (req, res) => {
   try {
-    console.log(req.params.id);
-
+ 
     const project = await Project.findByIdAndDelete(req.params.id);
 
     if (project === null) {
       console.log("project with given id does not exists");
       res.status(404).send("Could not find the project");
     } else {
-      console.log(project);
+      console.log("deleted");
       res.send("project deleted");
     }
   } catch (error) {

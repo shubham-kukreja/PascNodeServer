@@ -1,4 +1,6 @@
 const express = require('express');
+var { isAuthenticated, isAdmin, handleRecaptcha } = require('../middleware/controller');
+
 
 const router = express.Router();
 const feedback = require('../models/feedback');
@@ -7,7 +9,7 @@ router.get('/', async(req, res, next) => {
     res.send('You are on home page');
 })
 
-router.get('/feedback', async(req, res, next) => {
+router.get('/feedback'  ,async(req, res, next) => {
     feedback.find({})
         .then(feedbacks => {
             res.json(feedbacks)
@@ -19,7 +21,7 @@ router.get('/feedback', async(req, res, next) => {
 
 
 // post request using the form in the aboutus component
-router.post('/aboutus', async(req, res, next) => {
+router.post('/aboutus', handleRecaptcha , async(req, res, next) => {
     feedback.create(req.body).then((feed) => {
         res.send(feed);
     }).catch((err) => {
