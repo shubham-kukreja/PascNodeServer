@@ -6,7 +6,7 @@ var logger = require("morgan");
 var cors = require("cors");
 var passport = require("passport");
 var cookieSession = require("cookie-session");
-var bodyParser = require('body-parser');    
+var bodyParser = require('body-parser');
 
 require("dotenv").config();
 require("./config/database");
@@ -34,10 +34,10 @@ var app = express();
 
 app.use(cors());
 app.use(
-  cookieSession({
-    maxAge: 3600 * 1000,
-    keys: ["something"]
-  })
+    cookieSession({
+        maxAge: 3600 * 1000,
+        keys: ["something"]
+    })
 );
 
 // view engine setup
@@ -69,7 +69,7 @@ app.use("/api/blogs", blogsRoute);
 app.use("/api/projects", projectsRoute);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
 
 // error handler
