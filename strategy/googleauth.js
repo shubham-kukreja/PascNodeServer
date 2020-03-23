@@ -16,14 +16,14 @@ passport.deserializeUser((userid, done) => {
 passport.use(new GoogleStrategy({
     clientID: options.googleAuth.id,
     clientSecret: options.googleAuth.secret,
-    callbackURL: "https://localhost:3000/auth/google/callback"
+    callbackURL: "http://localhost:3000/auth/google/callback"
 }, (accessToken, refreshToken, profile, done) => {
     console.log(profile);
     user.findOne({ googleid: profile.id })
         .then((euser) => {
             if (euser) {
                 console.log('User Already exists');
-                return done(null, euser);
+               done(null, euser);
             } else {
                 new user({
                         username: profile.displayName,

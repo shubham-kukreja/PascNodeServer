@@ -9,7 +9,7 @@ isAuthenticated = async function (req, res, next) {
     if (!req.headers.authorization) {
         return res.json({ error: true , token: null })
     }
-    console.log(req.headers.authorization)
+  
     const token = req.headers.authorization.split(' ')[1];
     if (!token) {
         return res.json({ error: true , token: null })
@@ -39,7 +39,6 @@ isAuthenticated = async function (req, res, next) {
 
 isAdmin = async function (req, res, next) {
     if (!req.headers.authorization) {
-        console.log(req.headers.authorization);
 
         return res.json({ error: 'Header does not  exists', token: null })
     }
@@ -68,6 +67,7 @@ isAdmin = async function (req, res, next) {
                     email: user1.email, admin: user1.admin
                 }
                 req.token = token
+                
                 console.log("admin")
                 next();
             } else {
@@ -79,7 +79,7 @@ isAdmin = async function (req, res, next) {
 handleRecaptcha = function (req, res, next) {
     const captchaSecret = options.recapcha.secretKey;
     const token = req.body.captcha;
-    console.log(token)
+
     const url = `https://www.google.com/recaptcha/api/siteverify?secret=${captchaSecret}&response=${token}`;
 
 

@@ -2,20 +2,18 @@ const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema({
     name: {
-        type: String,
-        required: true
+        type: String
     },
     email: {
-        type: String,
-        required: true
+        type: String
     },
     subject: {
-        type: String,
-        required: true
+        type: String
+  
     },
     text: {
-        type: String,
-        required: true
+        type: String
+      
     }
 });
 

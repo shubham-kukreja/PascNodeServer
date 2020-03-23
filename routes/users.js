@@ -15,33 +15,56 @@ var router = express.Router();
 
 //GOOGLE OAUTH  
 router.get('/google', passport.authenticate('google', { scope: ['profile email'] }), (req, res) => {
-    res.json('Google Login Successfull !! ');
+    // setTimeout(() => {
+    //     res.redirect("/google/callback");    
+    // }, 5000);
+    res.send( {res2 : "Login Succesfull"})
+    
 });
 
 //GOOGLE REDIRECT LINK
 router.get('/google/callback', passport.authenticate('google'), (req, res) => {
     const user=req.user
     var payload = { subject: user._id , firstname:user.firstname 
-        , lastname:user.lastname , admin:user.admin};
+        , lastname:user.lastname , errgol:true};
     var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
-    res.json({
-        token: token,
-        userData: {
-            email: req.user.email,
-            firstname: req.user.firstname,
-            lastname: req.user.lastname
-        }
-    });
-})
+    res.cookie('jwt',token, {  maxAge: 3600000 })
+    return res.redirect("http://localhost:4200/#/bWsXeYHAPgFkIQTA8Bx5twAePYssw9BUOBc67BCItJW71OQzqVuqx4ooD5Eog8slSOV5z");    
+    // res.json({
+    //     token: token,
+    //     userData: {
+    //         email: req.user.email,
+    //         firstname: req.user.firstname,
+    //         lastname: req.user.lastname
+    //     }
+});
+
 
 
 //LOGIN OUT THE USER WITH OAUTH 
 router.get('/google/logout', (req, res) => {
+    // console.log("LOGGED OUT")
     req.logout();
-    res.send('Logged Out');
 });
 
 // SIGNING UP USER
+
+router.post( '/authgoogle' , async ( req,res)=>{
+    try{
+
+        const googleUser = await user.findById( req.body.id )
+
+        if( googleUser.googleid ){
+            res.json( { logged : true } )
+        }else{
+            res.json({ logged : false })
+        }
+
+    }catch(e){
+        res.json( {error:true} )
+    }
+} )
+
 
 router.post('/signup' , handleRecaptcha , (req, res) => {
     user.findOne({ email: req.body.email })
@@ -140,7 +163,7 @@ router.get('/verify/:url', (req, res) => {
                 verifiedUser.save();
                 console.log('User has been verified');
                 res.json({ 'user': tempuser.email, 'status': 'Email has ben verified' });
-                return TempUser.findByIdAndDelete(tempuser._id);
+                TempUser.findByIdAndDelete(tempuser._id);
             }
         })
 
@@ -160,29 +183,29 @@ router.post('/login', async(req, res) => {
             } else {
                 console.log(user)
                 var payload = { subject: user._id , firstname:user.firstname 
-                    , lastname:user.lastname , admin:user.admin};
+                    , lastname:user.lastname };
                 
                 var token = jwt.sign( payload, process.env.JWT_SECRET_KEY  );
 
                 console.log(token)
-                res.json({ error : false,  token, user : { admin:user.admin , firstname:user.firstname , lastname:user.lastname , _id:user._id}});
+                res.json({ error : false , token , user : { admin:user.admin , firstname:user.firstname , lastname:user.lastname , _id:user._id}});
             }
         })
 });
 
 
 //FOR CHECKING WHETHER ADMIN OR NOT This is a waste
-router.get('/profile', isAuthenticated , (req, res) => {
+router.get('/islogin', isAuthenticated , (req, res) => {
     console.log('You are authenticated');
-    console.log(req.user1);
-    res.json({ 'error': false , 'token': req.token , user : req.user1});
+ 
+    res.json({ 'error': false , 'login': true});
 })
 
 //FOR CHECKING WHETHER ADMIN OR NOT This is a waste
-router.get('/admin', isAdmin , (req, res) => {
-    console.log('You are authenticated');
-    console.log(req.user1);
-    res.json({ 'error': false , 'admin':true ,'token': req.token , 'user' : req.user1});
+router.get('/admin', [isAuthenticated ,isAdmin ], (req, res) => {
+    console.log('You are admin');
+  
+    res.json({ 'error': false , 'admin':true });
 })
 
 
