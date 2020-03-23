@@ -7,12 +7,22 @@ const Joi = require("@hapi/joi");
 
 const {
     validateRecover,
-    sendMail
+    sendResetMail
 } = require("../middleware/resetpasscontroller");
 
 const router = express.Router();
 
-// route for forget password
+//route for forget password
+router.get('/:id', (req, res) => {
+    User.findOne({ resetPasswordToken: req.params.id })
+        .then((user) => {
+            if (user) {
+                res.json({ 'email': user.email })
+            } else {
+                res.json({ 'email': null })
+            }
+        });
+})
 
 router.post("/recover", async(req, res) => {
     const valid = validateRecover(req.body);
@@ -24,29 +34,30 @@ router.post("/recover", async(req, res) => {
     try {
         user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(401).json({ message: "The email address does not exists" });
-
         //Generate and set password reset token
         user.generateResetPasswordToken();
         // console.log("token genereted");
-        const link = "https://" + req.headers.host + "/resetpassword/reset/" + user.resetPasswordToken;
+        const link = "http://localhost:4200/#/reset/" + user.resetPasswordToken;
 
         // Save the updated user object
         const result = await user.save();
-        const mailstatus = await sendMail(user, link);
+        const mailstatus = await sendResetMail(user, link);
         console.log("mailstatus", mailstatus);
-
+        console.log(user)
         if (mailstatus.message)
             return res.status(500).json({ message: mailstatus.message });
         console.log("mail sent");
         return res
             .status(200)
             .json({
-                message: "A reset email has been sent to " + `${result.email}` + "."
+                message: "A reset email has been sent to " + `${result.email}. Check your inbox` + "."
             });
     } catch (error) {
         return res.status(500).json(error);
     }
 });
+
+
 
 
 // use if not using the resetpasscontroller
@@ -140,10 +151,12 @@ router.get("/reset/:token", (req, res) => {
                     .status(401)
                     .json({ message: "Password reset token is invalid or has expired." });
 
-            //Redirect user
-            res.send(
-                `send post request to https://localhost:3443/resetpassword/reset/${req.params.token} with body object 'password': 'New Password' `
-            );
+            else {
+                return res.json({
+                    'message': 'success'
+                });
+            } //Redirect user
+
         })
         .catch(err => res.status(500).json({ message: err.message }));
 });
@@ -170,7 +183,6 @@ router.post("/reset/:token", (req, res) => {
         //Set the new password
         // const salt = await bcrypt.genSalt(10);
         user.password = bcrypt.hashSync(req.body.password);
-        console.log("user password", user.password);
 
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
