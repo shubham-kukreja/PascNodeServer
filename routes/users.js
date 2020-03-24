@@ -128,6 +128,7 @@ router.get("/verify/:url", (req, res) => {
       verifiedUser.save();
       res.json({ user: tempuser.email, status: "Email has ben verified" });
       TempUser.findByIdAndDelete(tempuser._id);
+      return res.redirect('https://pict.acm.org/#/login')
     }
   });
 });
