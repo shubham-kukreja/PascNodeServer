@@ -16,7 +16,7 @@ passport.deserializeUser((userid, done) => {
 passport.use(new GoogleStrategy({
     clientID: options.googleAuth.id,
     clientSecret: options.googleAuth.secret,
-    callbackURL: "http://localhost:3000/auth/google/callback"
+    callbackURL: "https://floating-woodland-45100.herokuapp.com/auth/google/callback"
 }, (accessToken, refreshToken, profile, done) => {
     user.findOne({ googleid: profile.id })
         .then((euser) => {
