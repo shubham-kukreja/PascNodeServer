@@ -78,10 +78,6 @@ router.post("/gallery/upload", async (req, res) => {
             msg: "Error: No File Selected"
           });
         } else {
-          // res.render("index", {
-          //   msg: "File uploaded",
-          //   file: `uploads/${req.file.filename}`
-          // });
           try {
             let options = {
               width: 400,
@@ -97,21 +93,17 @@ router.post("/gallery/upload", async (req, res) => {
             thumbarray.push(`gallery/thumbnail/${thumbnailFilename}.jpeg`);
             path.push(`gallery/uploads/${req.file.filename}`);
             master = { thumb: thumbarray, path: path };
-            console.log(thumbnailFilename);
-            console.log(thumbnail);
             const saveThumbnail = await saveBuffer(
               thumbnail,
               `public/gallery/thumbnail/${thumbnailFilename}.jpeg`
             );
             var tempCat = parseInt(category);
-            console.log(tempCat, typeof tempCat);
             const file = new File({
               path: `gallery/uploads/${req.file.filename}`,
               thumb: `gallery/thumbnail/${thumbnailFilename}.jpeg`,
               category: tempCat
             });
             const temp = await file.save();
-            console.log(temp);
           } catch (err) {
             console.error(err, "shubham");
           }
@@ -127,7 +119,6 @@ router.post("/upload", async (req, res) => {
     let thumbarray;
     let path;
     let master;
-    // req.file = req.files[i];
     if (err) {
       res.render("index", {
         msg: err
@@ -138,10 +129,6 @@ router.post("/upload", async (req, res) => {
           msg: "Error: No File Selected"
         });
       } else {
-        // res.render("index", {
-        //   msg: "File uploaded",
-        //   file: `uploads/${req.file.filename}`
-        // });
         try {
           let options = {
             width: 400,
@@ -163,12 +150,6 @@ router.post("/upload", async (req, res) => {
             thumbnail,
             `public/blogs/thumbnail/${thumbnailFilename}.jpeg`
           );
-          // const file = new File({
-          //   path: `public/blogs/uploads/${req.file.filename}`,
-          //   thumb: `public/blogs/thumbnail/${thumbnailFilename}.jpeg`
-          // });
-          // const temp = await file.save();
-          // console.log(temp);
         } catch (err) {
           console.error(err, "shubham");
         }

@@ -18,7 +18,6 @@ passport.use(new GoogleStrategy({
     clientSecret: options.googleAuth.secret,
     callbackURL: "http://localhost:3000/auth/google/callback"
 }, (accessToken, refreshToken, profile, done) => {
-    console.log(profile);
     user.findOne({ googleid: profile.id })
         .then((euser) => {
             if (euser) {
@@ -33,7 +32,6 @@ passport.use(new GoogleStrategy({
                         email: profile._json.email
                     }).save()
                     .then((newUser) => {
-                        console.log('User has been saved' + newUser);
                         done(null, newUser);
                     })
             }

@@ -26,7 +26,6 @@ const Project = mongoose.model("Project", projectSchema);
 
 const validateProject = data => {
   const schema = Joi.object({
-    // author: string,
     author: Joi.object({
       author_id: Joi.objectId(),
       author_name: Joi.string()
@@ -37,10 +36,8 @@ const validateProject = data => {
     content: Joi.string(),
     date: Joi.date(),
     heading: Joi.string(),
-    // blog_id: Joi.objectId(),
     image: Joi.string(),
     subheading: Joi.string()
-    // email: Joi.string()
   });
 
   return schema.validate(data);
