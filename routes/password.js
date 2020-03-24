@@ -37,7 +37,7 @@ router.post("/recover", async(req, res) => {
         //Generate and set password reset token
         user.generateResetPasswordToken();
         // console.log("token genereted");
-        const link = "pict.acm.org/#/reset/" + user.resetPasswordToken;
+        const link = "https://pict.acm.org/#/reset/" + user.resetPasswordToken;
 
         // Save the updated user object
         const result = await user.save();
