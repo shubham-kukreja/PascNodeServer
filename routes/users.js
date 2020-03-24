@@ -34,7 +34,7 @@ router.get("/google/callback", passport.authenticate("google"), (req, res) => {
     errgol: true
   };
   var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
-  res.cookie("jwt", token, { maxAge: 3600000 });
+  res.cookie("jwt", token, { secure : true ,maxAge: 3600000 });
   return res.redirect(
     "http://localhost:4200/#/bWsXeYHAPgFkIQTA8Bx5twAePYssw9BUOBc67BCItJW71OQzqVuqx4ooD5Eog8slSOV5z"
   );
