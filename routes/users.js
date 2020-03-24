@@ -60,7 +60,7 @@ router.post("/authgoogle", async (req, res) => {
   }
 });
 
-router.post("/signup" /*, handleRecaptcha*/, (req, res) => {
+router.post("/signup" , handleRecaptcha, (req, res) => {
   user
     .findOne({ email: req.body.email })
     .then(existingUser => {

@@ -48,7 +48,7 @@ router.get("/reviewblogs/", [isAuthenticated, isAdmin], async (req, res) => {
 });
 
 // user posting new blog
-router.post("/new/", async (req, res) => {
+router.post("/new/",isAuthenticated, async (req, res) => {
   const result = validateBlog(req.body);
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
