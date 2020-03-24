@@ -36,7 +36,7 @@ router.get("/google/callback", passport.authenticate("google"), (req, res) => {
   var token = jwt.sign(payload, process.env.JWT_SECRET_KEY);
   // res.cookie("jwt", token, { maxAge: 3600000 });
   return res.redirect(
-    `http://localhost:4200/#/75u6sD1nDLadfb16P8VG0qYGxZXjNp8UuAkEcF2OeJ7XE1SU14h5ey7FdmDhsyLYYWdPe52oXmSbnFzYeuXu0CnT9ajwuCgyVYMipjhyEvAfzeXoRNp61p8XMLU4PGFjoRGxxhqX4SxpIio7gPb03CuLxStM2X3HGQ8wVtGYDeBZtsvEwRzhn0FI1vwleS5Z3ZjUBF26/${token}`
+    `pict.acm.org/#/75u6sD1nDLadfb16P8VG0qYGxZXjNp8UuAkEcF2OeJ7XE1SU14h5ey7FdmDhsyLYYWdPe52oXmSbnFzYeuXu0CnT9ajwuCgyVYMipjhyEvAfzeXoRNp61p8XMLU4PGFjoRGxxhqX4SxpIio7gPb03CuLxStM2X3HGQ8wVtGYDeBZtsvEwRzhn0FI1vwleS5Z3ZjUBF26/${token}`
   );
 });
 
