@@ -115,27 +115,27 @@ router.post("/signup", handleRecaptcha, (req, res) => {
 });
 
 router.get("/verify/:url", (req, res) => {
-    const url = req.params.url;
-    TempUser.findOne({ URL: url }).then(tempuser => {
-        if (!tempuser) {
-            return res.json("No Such User found");
-        } else {
-            //THIS USER NEEDS TO BE DELETED FROM TEMP USER AND
-            //STORED IN USER MODEL
-            var verifiedUser = new user({
-                email: tempuser.email,
-                password: tempuser.password,
-                username: tempuser.username,
-                firstname: tempuser.firstname,
-                lastname: tempuser.lastname,
-                admin: false
-            });
-            verifiedUser.save();
-            res.json({ user: tempuser.email, status: "Email has ben verified" });
-            TempUser.findByIdAndDelete(tempuser._id);
-            return res.redirect('https://pict.acm.org/#/login')
-        }
-    });
+  const url = req.params.url;
+  TempUser.findOne({ URL: url }).then(tempuser => {
+    if (!tempuser) {
+      return res.json("No Such User found");
+    } else {
+      //THIS USER NEEDS TO BE DELETED FROM TEMP USER AND
+      //STORED IN USER MODEL
+      var verifiedUser = new user({
+        email: tempuser.email,
+        password: tempuser.password,
+        username: tempuser.username,
+        firstname: tempuser.firstname,
+        lastname: tempuser.lastname,
+        admin: false
+      });
+      verifiedUser.save();
+      // res.json({ user: tempuser.email, status: "Email has ben verified" });
+      TempUser.findByIdAndDelete(tempuser._id);
+      res.redirect('https://pict.acm.org/#/login')
+    }
+  });
 });
 
 // FOR LOGGING THE USER INTO THE APP
