@@ -3,6 +3,9 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
 
+const sgMail = require('@sendgrid/mail')
+
+/*
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -15,7 +18,7 @@ const transporter = nodemailer.createTransport({
         // do not fail on invalid certs
         rejectUnauthorized: false
     }
-});
+});*/
 // ===PASSWORD RECOVER AND RESET
 
 function validateRecover(data) {
@@ -28,7 +31,7 @@ function validateRecover(data) {
 }
 
 async function sendResetMail(user, link) {
-    const mailOptions = {
+    /*const mailOptions = {
         from: process.env.MAIL_SENDER_EMAIL, // sender address
         to: user.email, // list of receivers
         subject: "Password change request", // Subject line
@@ -47,7 +50,17 @@ async function sendResetMail(user, link) {
     } catch (error) {
         console.log("sending mail error", error);
         return error;
-    }
+    }*/
+
+    const msg = {
+        to: user.email,
+        from: process.env.MAIL_SENDER_EMAIL,
+        subject: "Password change request",
+        html: `Hi ${user.firstname} \n 
+        Please click on the following <a href=${link}>Link</a> to reset your password. \n\n 
+       If you did not request this, please ignore this email and your password will remain unchanged.\n`
+    };
+    return sgMail.send(msg);
 }
 
 module.exports = {

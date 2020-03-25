@@ -53,6 +53,7 @@ router.post("/recover", async(req, res) => {
                 message: "A reset email has been sent to " + `${result.email}. Check your inbox` + "."
             });
     } catch (error) {
+        console.log(error)
         return res.status(500).json(error);
     }
 });
