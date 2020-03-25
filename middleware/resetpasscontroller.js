@@ -2,6 +2,20 @@ const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.MAIL_SENDER_EMAIL,
+        pass: process.env.MAIL_SENDER_EMAIL_PASSWORD
+    },
+    tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+    }
+});
 // ===PASSWORD RECOVER AND RESET
 
 function validateRecover(data) {
@@ -14,20 +28,6 @@ function validateRecover(data) {
 }
 
 async function sendResetMail(user, link) {
-    console.log(process.env.MAIL_SENDER_EMAIL, process.env.MAIL_SENDER_PASSWORD);
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: process.env.MAIL_SENDER_EMAIL,
-            pass: process.env.MAIL_SENDER_EMAIL_PASSWORD
-        },
-        tls: {
-            // do not fail on invalid certs
-            rejectUnauthorized: false
-        }
-    });
     const mailOptions = {
         from: process.env.MAIL_SENDER_EMAIL, // sender address
         to: user.email, // list of receivers
