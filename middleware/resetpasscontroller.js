@@ -16,7 +16,6 @@ function validateRecover(data) {
 async function sendResetMail(user, link) {
     console.log(process.env.MAIL_SENDER_EMAIL, process.env.MAIL_SENDER_PASSWORD);
     let transporter = nodemailer.createTransport({
-        service: "gmail",
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
