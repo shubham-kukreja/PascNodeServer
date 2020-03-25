@@ -1,6 +1,7 @@
 var nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail')
 
-
+/*
 var transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -14,9 +15,9 @@ var transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
-
+*/
 verificationMail = function(receiver, verifyurl) {
-    var mailOptions = {
+    /*var mailOptions = {
         from: process.env.MAIL_SENDER_EMAIL,
         to: receiver,
         subject: 'Verification email',
@@ -29,7 +30,15 @@ verificationMail = function(receiver, verifyurl) {
         } else {
             console.log('Email sent:' + info.response);
         }
-    });
+    });*/
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+        to: receiver,
+        from: process.env.MAIL_SENDER_EMAIL,
+        subject: 'Verification email',
+        html: `<p>You Can verfiy your account by clicking on the <a href="${verifyurl}">Link</a>`,
+    };
+    sgMail.send(msg);
 }
 
 
