@@ -16,9 +16,6 @@ var { verificationMail } = require("../config/config");
 var crypto = require("crypto");
 
 var router = express.Router();
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 //GOOGLE OAUTH
 router.get(
   "/google",
@@ -65,76 +62,79 @@ router.post("/authgoogle", async (req, res) => {
 });
 
 router.post("/signup", handleRecaptcha, (req, res) => {
-  user
-    .findOne({ email: req.body.email })
-    .then(existingUser => {
-      if (existingUser) {
-        return existingUser;
-      }
-      return TempUser.findOne({ email: req.body.email });
-    })
-    .then(newUser => {
-      if (newUser) {
-        return res.json({ error: "User already exists ", token: null });
-      } else {
-        var url;
-        crypto.randomBytes(48, (err, buf) => {
-          if (err) console.log(err);
-          url = buf.toString("hex");
+    user
+        .findOne({ email: req.body.email })
+        .then(existingUser => {
+            if (existingUser) {
+                return existingUser;
+            }
+            return TempUser.findOne({ email: req.body.email });
+        })
+        .then(newUser => {
+            if (newUser) {
+                return res.json({ error: "User already exists ", token: null });
+            } else {
+                var url;
+                crypto.randomBytes(48, (err, buf) => {
+                    if (err) console.log(err);
+                    url = buf.toString("hex");
 
-          const hashedPassword = bcrypt.hashSync(req.body.password);
-          var newTempUser = new TempUser({
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            email: req.body.email,
-            password: hashedPassword,
+                    const hashedPassword = bcrypt.hashSync(req.body.password);
+                    var newTempUser = new TempUser({
+                        firstname: req.body.firstname,
+                        lastname: req.body.lastname,
+                        email: req.body.email,
+                        password: hashedPassword,
 
-            admin: false,
-            URL: url
-          });
-          console.log("The User has been saved to the temporary storage");
-          const verifyurl =
-            "https://" + req.headers.host + "/auth/verify/" + url;
-          verificationMail(newTempUser.email, verifyurl);
-          newTempUser.save();
-          res.json({
-            user: {
-              firstname: newTempUser.firstname,
-              lastname: newTempUser.lastname,
-              email: newTempUser.email
-            },
-            status: "The user has been saved"
-          });
+                        admin: false,
+                        URL: url
+                    });
+                    console.log("The User has been saved to the temporary storage");
+                    const verifyurl =
+                        "https://" + req.headers.host + "/auth/verify/" + url;
+                    verificationMail(newTempUser.email, verifyurl);
+                    newTempUser.save();
+                    res.json({
+                        user: {
+                            firstname: newTempUser.firstname,
+                            lastname: newTempUser.lastname,
+                            email: newTempUser.email
+                        },
+                        status: "The user has been saved"
+                    });
+                });
+            }
+        })
+        .catch(err => {
+            throw new Error(err);
         });
-      }
-    })
-    .catch(err => {
-      throw new Error(err);
-    });
 });
 
 router.get("/verify/:url", (req, res) => {
-  const url = req.params.url;
-  TempUser.findOne({ URL: url }).then(tempuser => {
-    if (!tempuser) {
-      return res.json("No Such User found");
-    } else {
-      //THIS USER NEEDS TO BE DELETED FROM TEMP USER AND
-      //STORED IN USER MODEL
-      var verifiedUser = new user({
-        email: tempuser.email,
-        password: tempuser.password,
-        username: tempuser.username,
-        firstname: tempuser.firstname,
-        lastname: tempuser.lastname,
-        admin: false
-      });
-      verifiedUser.save();
-      // res.json({ user: tempuser.email, status: "Email has ben verified" });
-      TempUser.findByIdAndDelete(tempuser._id);
-      res.redirect("https://pict.acm.org/#/login");
-    }
-  });
+
+    const url = req.params.url;
+    TempUser.findOne({ URL: url }).then(tempuser => {
+        if (!tempuser) {
+            return res.json("No Such User found");
+        } else {
+            //THIS USER NEEDS TO BE DELETED FROM TEMP USER AND
+            //STORED IN USER MODEL
+            var verifiedUser = new user({
+                email: tempuser.email,
+                password: tempuser.password,
+                username: tempuser.username,
+                firstname: tempuser.firstname,
+                lastname: tempuser.lastname,
+                admin: false
+            });
+            verifiedUser.save();
+            // res.json({ user: tempuser.email, status: "Email has ben verified" });
+            TempUser.findByIdAndDelete(tempuser._id);
+
+            res.redirect('https://pict.acm.org/#/login')
+        }
+    });
+
 });
 
 // FOR LOGGING THE USER INTO THE APP

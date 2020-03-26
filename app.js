@@ -8,6 +8,10 @@ var passport = require("passport");
 var cookieSession = require("cookie-session");
 var bodyParser = require('body-parser');
 
+var sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+
 require("dotenv").config();
 require("./config/database");
 
@@ -55,7 +59,7 @@ app.use(passport.session());
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 // defining the routes
 app.use("/", indexRoute);
 
@@ -83,7 +87,7 @@ app.use(function(req, res, next) {
 //     res.status(err.status || 500);
 //     res.send('Error');
 // });
-app.listen(process.env.PORT, ()=> {
-    console.log('Server Listening on ',process.env.PORT)
+app.listen(process.env.PORT, () => {
+    console.log('Server Listening on ', process.env.PORT)
 })
 module.exports = app;
