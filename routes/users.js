@@ -98,7 +98,7 @@ router.post("/signup", handleRecaptcha, (req, res) => {
                         "https://" + req.headers.host + "/auth/verify/" + url;
                     verificationMail(newTempUser.email, verifyurl);
                     newTempUser.save()
-                    return res.json({
+                    res.json({
                         user: {
                             firstname: newTempUser.firstname,
                             lastname: newTempUser.lastname,
