@@ -4,6 +4,7 @@ const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
+const sgMail = require('@sendgrid/mail')
 
 const {
     validateRecover,
@@ -112,26 +113,35 @@ router.post("/reset/:token", (req, res) => {
             if (err) return res.status(500).json({ message: err.message });
 
             // send email
-            const mailOptions = {
+            // const mailOptions = {
+            //     to: user.email,
+            //     from: process.env.MAIL_SENDER_EMAIL,
+            //     subject: "Your password has been changed",
+            //     text: `Hi ${user.displayName} \n 
+            //   This is a confirmation that the password for your account ${user.email} has just been changed.\n`
+            // };
+
+            // let transporter = nodemailer.createTransport({
+            //     service: "gmail",
+            //     auth: {
+            //         user: process.env.MAIL_SENDER_EMAIL,
+            //         pass: process.env.MAIL_SENDER_EMAIL_PASSWORD
+            //     }
+            // });
+            // transporter.sendMail(mailOptions, (error, result) => {
+            //     if (error) return res.status(500).json({ message: error.message });
+
+            //     res.status(200).json({ message: "Your password has been updated." });
+            // });
+            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+            const msg = {
                 to: user.email,
                 from: process.env.MAIL_SENDER_EMAIL,
                 subject: "Your password has been changed",
-                text: `Hi ${user.displayName} \n 
-              This is a confirmation that the password for your account ${user.email} has just been changed.\n`
+                html: `Hi ${user.displayName} \n 
+                   This is a confirmation that the password for your account ${user.email} has just been changed.\n`
             };
-
-            let transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                    user: process.env.MAIL_SENDER_EMAIL,
-                    pass: process.env.MAIL_SENDER_EMAIL_PASSWORD
-                }
-            });
-            transporter.sendMail(mailOptions, (error, result) => {
-                if (error) return res.status(500).json({ message: error.message });
-
-                res.status(200).json({ message: "Your password has been updated." });
-            });
+            return sgMail.send(msg);
         });
     });
 });
