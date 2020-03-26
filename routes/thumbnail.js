@@ -7,12 +7,12 @@ const saveBuffer = require("save-buffer");
 const googleStorage = require('@google-cloud/storage');
 var router = express.Router();
 
-// const storage3 = googleStorage({
+// const storage2 = googleStorage({
 //   projectId: "pascblogs-54ff3",
 //   keyFilename: "<path to service accounts prviate key JSON>"
 // });
 
-// const bucket = storage.bucket("pascblogs-54ff3.appspot.com");
+// const bucket = storage2.bucket("pascblogs-54ff3.appspot.com");
 
 
 const storage = multer.diskStorage({
