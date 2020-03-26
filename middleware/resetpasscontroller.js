@@ -51,7 +51,7 @@ async function sendResetMail(user, link) {
         console.log("sending mail error", error);
         return error;
     }*/
-
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
         to: user.email,
         from: process.env.MAIL_SENDER_EMAIL,
