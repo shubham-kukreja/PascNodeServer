@@ -7,7 +7,7 @@ const saveBuffer = require("save-buffer");
 const googleStorage = require('@google-cloud/storage');
 var router = express.Router();
 
-const storage = googleStorage({
+const storage3 = googleStorage({
   projectId: "pascblogs-54ff3",
   keyFilename: "<path to service accounts prviate key JSON>"
 });
