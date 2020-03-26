@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^4.6.0",
     "@hapi/joi": "^17.1.1",
     "@sendgrid/mail": "^6.5.5",
     "bcryptjs": "^2.4.3",
