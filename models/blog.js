@@ -37,10 +37,10 @@ const validateBlog = data => {
     content: Joi.string(),
     data: Joi.date(),
     heading: Joi.string(),
-    image: Joi.string(),
+    // image: Joi.allow(),
     subHeading: Joi.string(),
     date: Joi.date(),
-    thumb: Joi.string()
+    // thumb: Joi.string()
   });
 
   return schema.validate(data);

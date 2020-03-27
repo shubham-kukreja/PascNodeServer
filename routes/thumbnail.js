@@ -4,26 +4,87 @@ const path = require("path");
 const imageThumbnail = require("image-thumbnail");
 const { File } = require("../models/file");
 const saveBuffer = require("save-buffer");
-const googleStorage = require('@google-cloud/storage');
+const { googleStorage } = require("@google-cloud/storage");
 var router = express.Router();
+const crypto = require("crypto");
+var admin = require("firebase-admin");
+var serviceAccount = require("../bin/pascblogs-54ff3-firebase-adminsdk-yvopm-1aec2070de.json");
+const GridFsStorage = require("multer-gridfs-storage");
+const mongoose = require("mongoose");
+// using a database instance
+// const database = await MongoClient.connect(process.env.MONGODB_URL);
+const mongoURI = process.env.MONGODB_URL;
 
-// const storage2 = googleStorage({
-//   projectId: "pascblogs-54ff3",
-//   keyFilename: "<path to service accounts prviate key JSON>"
-// });
-
-// const bucket = storage2.bucket("pascblogs-54ff3.appspot.com");
-
-
-const storage = multer.diskStorage({
-  destination: "./public/gallery/uploads/",
-  filename: async (req, file, cb) => {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
+// connection
+const conn = mongoose.createConnection(mongoURI, {
+  useNewUrlParser: true
+});
+let gfs;
+conn.once("open", () => {
+  // init stream
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: "uploads"
+  });
+});
+let globalFilename;
+const storage = new GridFsStorage({
+  url: mongoURI,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString("hex") + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
+          bucketName: "uploads"
+        };
+        globalFilename = filename;
+        console.log(filename, 'from storage')
+        resolve(fileInfo);
+        return filename;
+      });
+    });
   }
 });
+
+const upload = multer({
+  storage
+}).single("photo");
+
+router.get("/image/:filename", (req, res) => {
+  // console.log('id', req.params.id)
+  const file = gfs
+    .find({
+      filename: req.params.filename
+    })
+    .toArray((err, files) => {
+      if (!files || files.length === 0) {
+        return res.status(404).json({
+          err: "no files exist"
+        });
+      }
+      gfs.openDownloadStreamByName(req.params.filename).pipe(res);
+    });
+});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   storageBucket: "pascblogs-54ff3.appspot.com"
+// });
+
+// var bucket = admin.storage().bucket();
+// bucket.upload("Screenshot.png");
+
+// const storagemulter = multer.diskStorage({
+//   destination: "./public/gallery/uploads/",
+//   filename: async (req, file, cb) => {
+//     cb(
+//       null,
+//       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+//     );
+//   }
+// });
 const storageblogs = multer.diskStorage({
   destination: "./public/blogs/uploads/",
   filename: async (req, file, cb) => {
@@ -33,13 +94,13 @@ const storageblogs = multer.diskStorage({
     );
   }
 });
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10000000 },
-  fileFilter: (req, file, cb) => {
-    checkFileType(file, cb);
-  }
-}).array("photo", 10);
+// const upload = multer({
+//   storage: storage,
+//   limits: { fileSize: 10000000 },
+//   fileFilter: (req, file, cb) => {
+//     checkFileType(file, cb);
+//   }
+// }).array("photo", 10);
 
 const uploadSingle = multer({
   storage: storageblogs,
@@ -106,6 +167,7 @@ router.post("/gallery/upload", async (req, res) => {
               `public/gallery/thumbnail/${thumbnailFilename}.jpeg`
             );
             var tempCat = parseInt(category);
+
             const file = new File({
               path: `gallery/uploads/${req.file.filename}`,
               thumb: `gallery/thumbnail/${thumbnailFilename}.jpeg`,
@@ -121,6 +183,22 @@ router.post("/gallery/upload", async (req, res) => {
     res.send(master);
   });
 });
+
+// router.post("/upload", upload.single("photo"), (req, res) => {
+//   res.json({
+//     upload: true
+//   });
+// });
+
+router.post('/upload/firebase', async(req, res) => {
+  const file = new File({
+    path: req.body.path,
+    thumb: req.body.thumb,
+    category: req.body.category
+  });
+  file.save();
+  res.json(file)
+})
 
 router.post("/upload", async (req, res) => {
   uploadSingle(req, res, async err => {
@@ -148,10 +226,13 @@ router.post("/upload", async (req, res) => {
           const thumbnail = await imageThumbnail(
             `public/blogs/uploads/${req.file.filename}`
           );
+          const image = await image;
           thumbnailFilename = "thumbnail_" + req.file.filename.split(".")[0];
-          thumbarray = `blogs/thumbnail/${thumbnailFilename}.jpeg`;
-          path = `blogs/uploads/${req.file.filename}`;
-          master = { thumb: thumbarray, path: path };
+          thumbarray = `public/blogs/thumbnail/${thumbnailFilename}.jpeg`;
+          path = `public/blogs/uploads/${req.file.filename}`;
+          console.log("a", thumbarray);
+          console.log("b", path);
+          master = { thumb: thumbnail, path: image };
           console.log(thumbnailFilename);
           console.log(thumbnail);
           const saveThumbnail = await saveBuffer(
@@ -163,15 +244,15 @@ router.post("/upload", async (req, res) => {
         }
       }
     }
-    res.send(master);
+
+    res.json(master);
   });
 });
 
-
-// const uploadImageToStorage = (file) => {
+// const uploadImageToStorage = file => {
 //   return new Promise((resolve, reject) => {
 //     if (!file) {
-//       reject('No image file');
+//       reject("No image file");
 //     }
 //     let newFileName = `${file.originalname}_${Date.now()}`;
 
@@ -179,22 +260,23 @@ router.post("/upload", async (req, res) => {
 
 //     const blobStream = fileUpload.createWriteStream({
 //       metadata: {
-//         contentType: file.mimetype
+//         contentType: file.type
 //       }
 //     });
 
-//     blobStream.on('error', (error) => {
-//       reject('Something is wrong! Unable to upload at the moment.');
+//     blobStream.on("error", error => {
+//       reject("Something is wrong! Unable to upload at the moment.", error);
 //     });
 
-//     blobStream.on('finish', () => {
-//       // The public URL can be used to directly access the file via HTTP.
-//       const url = format(`https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`);
+//     blobStream.on("finish", () => {
+//       const url = format(
+//         `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`
+//       );
 //       resolve(url);
 //     });
 
 //     blobStream.end(file.buffer);
 //   });
-// }
+// };
 
 module.exports = router;
